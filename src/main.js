@@ -2,16 +2,20 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
-// 1. 确保正确导入 router
 import router from './router'
+// 导入你封装的 axios 实例（注意路径是否正确）
+import request from '@/axios'
 
+// 创建 Vue 3 应用实例
 const app = createApp(App)
 
-// 2. 必须添加这一行，真正启用路由
+// 安装插件
 app.use(router)
-
-// 3. 安装 Element Plus
 app.use(ElementPlus)
 
-// 4. 挂载
+// ===== 关键修复：Vue 3 挂载全局属性的正确方式 =====
+// 替代 Vue 2 的 Vue.prototype.$axios
+app.config.globalProperties.$axios = request
+
+// 挂载应用到 DOM
 app.mount('#app')
