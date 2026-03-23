@@ -142,7 +142,7 @@ const banLoading = ref(false)
 const banFormRef = ref(null)
 const banForm = reactive({
   userId: null,
-  duration: 30, // 默认1个月
+  banDays: 30, // 默认1个月
   reason: ''
 })
 const banRules = reactive({
@@ -166,11 +166,20 @@ const submitBan = async () => {
     if (valid) {
       banLoading.value = true
       try {
-        await request.post('/users/admin/ban', banForm)
+        // 显式构造参数，确保字段名与后端 UserBanDTO 一致
+        const postData = {
+          userId: banForm.userId, // 对应后端 Long userId
+          banDays: banForm.banDays, // 对应后端 Integer banDays
+          reason: banForm.reason // 对应后端 String reason
+        }
+
+        await request.post('/users/admin/ban', postData)
+
         ElMessage.success('封禁成功，已加入黑名单')
         banDialogVisible.value = false
-        fetchList() // 刷新列表，状态会自动变为“封禁”
+        fetchList()
       } catch (error) {
+        // 如果这里报错，请查看浏览器控制台 Network 选项卡的 Response
         console.error('封禁失败', error)
       } finally {
         banLoading.value = false
