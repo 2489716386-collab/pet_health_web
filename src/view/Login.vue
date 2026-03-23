@@ -91,7 +91,7 @@ const handleLogin = async () => {
           ElMessage.success('登录成功，欢迎回来！')
 
           // 【破案核心】后端 data 直接就是 token 字符串
-          localStorage.setItem('token', res.data)
+          localStorage.setItem('token', res.data.token)
 
           // 【破案核心】根据你 router/index.js 的配置，首页路径是 '/'
           router.push('/')
