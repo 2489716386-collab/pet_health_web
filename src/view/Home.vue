@@ -1,128 +1,243 @@
 <template>
-  <el-container class="layout-container-demo" style="height: 100%">
-    <el-aside width="200px">
-      <el-scrollbar>
-        <el-menu :default-openeds="['1', '3']">
-          <el-sub-menu index="1">
+  <el-container class="home-container">
+    <el-aside width="220px" class="sidebar">
+      <div class="logo-box">
+        <img src="../assets/logo.png" alt="logo" class="logo-img" />
+        <span class="logo-text">宠物健康后台</span>
+      </div>
+
+      <el-menu
+        :default-active="activePath"
+        class="el-menu-vertical"
+        background-color="#304156"
+        text-color="#bfcbd9"
+        active-text-color="#409EFF"
+        router
+        unique-opened
+      >
+        <template v-for="item in menuList" :key="item.path">
+          <el-sub-menu v-if="item.children" :index="item.path">
             <template #title>
-              <el-icon><message /></el-icon>Navigator One
+              <el-icon><component :is="item.icon" /></el-icon>
+              <span>{{ item.title }}</span>
             </template>
-            <el-menu-item-group>
-              <template #title>Group 1</template>
-              <el-menu-item index="1-1">Option 1</el-menu-item>
-              <el-menu-item index="1-2">Option 2</el-menu-item>
-            </el-menu-item-group>
-            <el-menu-item-group title="Group 2">
-              <el-menu-item index="1-3">Option 3</el-menu-item>
-            </el-menu-item-group>
-            <el-sub-menu index="1-4">
-              <template #title>Option4</template>
-              <el-menu-item index="1-4-1">Option 4-1</el-menu-item>
-            </el-sub-menu>
+            <el-menu-item
+              v-for="sub in item.children"
+              :key="sub.path"
+              :index="sub.path"
+            >
+              {{ sub.title }}
+            </el-menu-item>
           </el-sub-menu>
-          <el-sub-menu index="2">
-            <template #title>
-              <el-icon><icon-menu /></el-icon>Navigator Two
-            </template>
-            <el-menu-item-group>
-              <template #title>Group 1</template>
-              <el-menu-item index="2-1">Option 1</el-menu-item>
-              <el-menu-item index="2-2">Option 2</el-menu-item>
-            </el-menu-item-group>
-            <el-menu-item-group title="Group 2">
-              <el-menu-item index="2-3">Option 3</el-menu-item>
-            </el-menu-item-group>
-            <el-sub-menu index="2-4">
-              <template #title>Option 4</template>
-              <el-menu-item index="2-4-1">Option 4-1</el-menu-item>
-            </el-sub-menu>
-          </el-sub-menu>
-          <el-sub-menu index="3">
-            <template #title>
-              <el-icon><setting /></el-icon>Navigator Three
-            </template>
-            <el-menu-item-group>
-              <template #title>Group 1</template>
-              <el-menu-item index="3-1">Option 1</el-menu-item>
-              <el-menu-item index="3-2">Option 2</el-menu-item>
-            </el-menu-item-group>
-            <el-menu-item-group title="Group 2">
-              <el-menu-item index="3-3">Option 3</el-menu-item>
-            </el-menu-item-group>
-            <el-sub-menu index="3-4">
-              <template #title>Option 4</template>
-              <el-menu-item index="3-4-1">Option 4-1</el-menu-item>
-            </el-sub-menu>
-          </el-sub-menu>
-        </el-menu>
-      </el-scrollbar>
+
+          <el-menu-item v-else :index="item.path">
+            <el-icon><component :is="item.icon" /></el-icon>
+            <template #title>{{ item.title }}</template>
+          </el-menu-item>
+        </template>
+      </el-menu>
     </el-aside>
 
     <el-container>
-      <el-header style="text-align: right; font-size: 12px">
-        <div class="toolbar">
-          <el-dropdown>
-            <el-icon style="margin-right: 8px; margin-top: 1px">
-              <setting />
-            </el-icon>
+      <el-header class="header">
+        <div class="header-left">
+          <el-icon class="collapse-icon"><Fold /></el-icon>
+          <span class="breadcrumb-title">欢迎使用宠物健康管理系统</span>
+        </div>
+        <div class="header-right">
+          <el-dropdown trigger="click" @command="handleCommand">
+            <span class="el-dropdown-link avatar-box">
+              <el-avatar :size="36" src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png" />
+              <span class="admin-name">超级管理员</span>
+              <el-icon class="el-icon--right"><arrow-down /></el-icon>
+            </span>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item>View</el-dropdown-item>
-                <el-dropdown-item>Add</el-dropdown-item>
-                <el-dropdown-item>Delete</el-dropdown-item>
+                <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
-          <span>Tom</span>
         </div>
       </el-header>
 
-      <el-main>
-        <el-scrollbar>
-          <el-table :data="tableData">
-            <el-table-column prop="date" label="Date" width="140" />
-            <el-table-column prop="name" label="Name" width="120" />
-            <el-table-column prop="address" label="Address" />
-          </el-table>
-        </el-scrollbar>
+      <el-main class="main-content">
+        <router-view v-slot="{ Component }">
+          <transition name="fade-transform" mode="out-in">
+            <component :is="Component" />
+          </transition>
+        </router-view>
       </el-main>
     </el-container>
   </el-container>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { Menu as IconMenu, Message, Setting } from '@element-plus/icons-vue'
+import { ref, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import {
+  User, Setting, ChatDotRound, Fold, ArrowDown, List
+} from '@element-plus/icons-vue'
 
-const item = {
-  date: '2016-05-02',
-  name: 'Tom',
-  address: 'No. 189, Grove St, Los Angeles'
+const route = useRoute()
+const router = useRouter()
+
+// 高亮当前选中的菜单
+const activePath = computed(() => route.path)
+
+// 📌 核心：根据你的需求完美还原的菜单结构配置
+const menuList = ref([
+  {
+    title: '用户管理',
+    icon: User,
+    path: '/users',
+    children: [
+      { title: '用户列表', path: '/users/list' },
+      { title: '黑名单列表', path: '/users/blacklist' }
+    ]
+  },
+  {
+    title: '社区动态',
+    icon: ChatDotRound,
+    path: '/community',
+    children: [
+      { title: '动态内容审核', path: '/community/posts' },
+      { title: '动态评论审核', path: '/community/comments' },
+      { title: '举报记录中心', path: '/community/reports' }
+    ]
+  },
+  {
+    title: '系统配置',
+    icon: Setting,
+    path: '/system',
+    children: [
+      { title: '系统通知', path: '/system/notifications' },
+      { title: '敏感词字典', path: '/system/sensitive-words' },
+      { title: '宠物品种词典', path: '/system/breeds' },
+      { title: '养护知识标准库', path: '/system/care-knowledge' },
+      { title: '宠物心情记录表', path: '/system/mood-records' }
+    ]
+  },
+  {
+    title: '管理员操作日志',
+    icon: List,
+    path: '/logs/admin-logs' // 这里直接跳转，没有子菜单
+  }
+])
+
+// 顶部下拉菜单指令处理
+const handleCommand = (command) => {
+  if (command === 'logout') {
+    ElMessageBox.confirm('确定要退出登录吗?', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }).then(() => {
+      // 1. 清除本地存储的 Token
+      localStorage.removeItem('token')
+      // 2. 跳转回登录页
+      router.push('/login')
+      ElMessage.success('已安全退出')
+    }).catch(() => {})
+  }
 }
-const tableData = ref(Array.from({ length: 20 }).fill(item))
 </script>
 
 <style scoped>
-.layout-container-demo .el-header {
-  position: relative;
-  background-color: var(--el-color-primary-light-7);
-  color: var(--el-text-color-primary);
+.home-container {
+  height: 100vh;
+  background-color: #f0f2f5;
 }
-.layout-container-demo .el-aside {
-  color: var(--el-text-color-primary);
-  background: var(--el-color-primary-light-8);
+
+/* 左侧边栏样式 */
+.sidebar {
+  background-color: #304156;
+  transition: width 0.3s;
+  overflow-x: hidden;
+  box-shadow: 2px 0 6px rgba(0, 21, 41, 0.35);
+  z-index: 10;
 }
-.layout-container-demo .el-menu {
-  border-right: none;
-}
-.layout-container-demo .el-main {
-  padding: 0;
-}
-.layout-container-demo .toolbar {
-  display: inline-flex;
+
+.logo-box {
+  height: 60px;
+  display: flex;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  right: 20px;
+  background-color: #2b3649;
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+}
+.logo-img {
+  width: 32px;
+  height: 32px;
+  margin-right: 10px;
+}
+.el-menu-vertical {
+  border-right: none;
+}
+
+/* 顶部导航栏样式 */
+.header {
+  height: 60px;
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+  z-index: 9;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+}
+.collapse-icon {
+  font-size: 20px;
+  cursor: pointer;
+  margin-right: 15px;
+  color: #606266;
+}
+.breadcrumb-title {
+  font-size: 16px;
+  color: #303133;
+  font-weight: 500;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+.avatar-box {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  outline: none;
+}
+.admin-name {
+  margin-left: 10px;
+  font-size: 14px;
+  color: #333;
+}
+
+/* 主体内容区样式 */
+.main-content {
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* 页面切换动画 */
+.fade-transform-leave-active,
+.fade-transform-enter-active {
+  transition: all 0.3s;
+}
+.fade-transform-enter-from {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+.fade-transform-leave-to {
+  opacity: 0;
+  transform: translateX(20px);
 }
 </style>
