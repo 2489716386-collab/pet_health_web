@@ -8,6 +8,14 @@
         <el-form-item label="昵称">
           <el-input v-model="queryParams.nickname" placeholder="请输入昵称模糊搜索" clearable />
         </el-form-item>
+
+        <el-form-item label="角色" style="width: 30%">
+          <el-select v-model="queryParams.role" placeholder="选择角色" clearable @change="handleSearch">
+            <el-option label="普通用户" value="0" />
+            <el-option label="管理员" value="1" />
+          </el-select>
+        </el-form-item>
+
         <el-form-item>
           <el-button type="primary" @click="handleSearch">查 询</el-button>
           <el-button @click="resetQuery">重 置</el-button>
@@ -20,9 +28,21 @@
 
         <el-table-column prop="status" label="状态" align="center" width="120">
           <template #default="scope">
-            <el-tag :type="scope.row.status === '正常' ? 'success' : 'danger'">
-              {{ scope.row.status }}
-            </el-tag>
+            <div v-if="scope.row">
+              <el-tag :type="scope.row.status === '正常' ? 'success' : 'danger'">
+                {{ scope.row.status || '未知' }}
+              </el-tag>
+            </div>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="身份" align="center" width="120">
+          <template #default="scope">
+            <div v-if="scope.row">
+              <el-tag :type="scope.row.role === '1' ? 'danger' : 'success'">
+                {{ scope.row.role === '1' ? '管理员' : '普通用户' }}
+              </el-tag>
+            </div>
           </template>
         </el-table-column>
 
@@ -91,11 +111,13 @@ import request from '@/axios'
 const loading = ref(false)
 const tableData = ref([])
 const total = ref(0)
+
 const queryParams = reactive({
   pageNum: 1,
   pageSize: 10,
   userId: '',
-  nickname: ''
+  nickname: '',
+  role: null // 初始为 null 表示不限角色
 })
 
 // 获取用户列表数据
@@ -123,6 +145,7 @@ const handleSearch = () => {
 const resetQuery = () => {
   queryParams.userId = ''
   queryParams.nickname = ''
+  queryParams.role = null
   handleSearch()
 }
 
@@ -173,7 +196,7 @@ const submitBan = async () => {
           reason: banForm.reason // 对应后端 String reason
         }
 
-        await request.post('/users/admin/ban', postData)
+        await request.post('/users/admin/unban', postData)
 
         ElMessage.success('封禁成功，已加入黑名单')
         banDialogVisible.value = false

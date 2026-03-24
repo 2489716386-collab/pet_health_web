@@ -39,12 +39,23 @@ const router = createRouter({
   ]
 })
 
+// --- 添加以下路由拦截逻辑 ---
 router.beforeEach((to, from, next) => {
+  // 1. 获取本地存储的 token
   const token = localStorage.getItem('token')
-  if (to.path !== '/login' && !token) {
-    next('/login')
+
+  // 2. 判断是否去往登录页
+  if (to.path === '/login') {
+    next() // 如果去登录页，直接放行
   } else {
-    next()
+    // 3. 如果去往其他页面，检查是否有 token
+    if (!token) {
+      // 没有 token，强制跳转到登录页
+      next('/login')
+    } else {
+      // 有 token，放行
+      next()
+    }
   }
 })
 

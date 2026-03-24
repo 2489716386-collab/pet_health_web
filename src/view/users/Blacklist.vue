@@ -80,7 +80,7 @@ const queryParams = reactive({
 const fetchList = async () => {
   loading.value = true
   try {
-    const res = await request.get('//user-blacklist/page', { params: queryParams })
+    const res = await request.get('/user-blacklist/page', { params: queryParams })
     tableData.value = res.data.records || res.data.list || []
     total.value = res.data.total || 0
   } catch (error) {
@@ -117,7 +117,7 @@ const executeUnban = (userIds) => {
     }
   ).then(async () => {
     try {
-      await request.post('//user-blacklist/unban/batch', userIds)
+      await request.post('/user-blacklist/unban/batch', userIds)
       ElMessage.success('操作成功，用户已恢复正常状态')
       fetchList() // 刷新表格
     } catch (error) {
