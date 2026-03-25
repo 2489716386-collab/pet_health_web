@@ -121,7 +121,7 @@ const menuList = ref([
   {
     title: '管理员操作日志',
     icon: List,
-    path: '/logs/admin-logs' // 这里直接跳转，没有子菜单
+    path: '/logs/AdminLogs' // 这里直接跳转，没有子菜单
   }
 ])
 

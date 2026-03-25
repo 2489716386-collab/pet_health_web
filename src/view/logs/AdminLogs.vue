@@ -12,11 +12,11 @@
         <el-form-item label="操作时间">
           <el-date-picker
             v-model="timeRange"
-            type="datetimerange"
+            type="daterange"
             range-separator="至"
             start-placeholder="开始日期"
             end-placeholder="结束日期"
-            value-format="YYYY-MM-DD HH:mm:ss"
+            value-format="YYYY-MM-DD"
             @change="handleTimeChange"
           />
         </el-form-item>
@@ -76,8 +76,8 @@ const queryParams = reactive({
   pageSize: 10,
   adminId: '',
   action: '',
-  beginTime: '',
-  endTime: ''
+  startDate: '',
+  endDate: ''
 })
 
 // 获取日志列表
@@ -103,11 +103,11 @@ const fetchList = async () => {
 // 处理时间选择器变化
 const handleTimeChange = (val) => {
   if (val && val.length === 2) {
-    queryParams.beginTime = val[0]
-    queryParams.endTime = val[1]
+    queryParams.startDate = val[0]
+    queryParams.endDate = val[1]
   } else {
-    queryParams.beginTime = ''
-    queryParams.endTime = ''
+    queryParams.startDate = ''
+    queryParams.endDate = ''
   }
 }
 
@@ -120,8 +120,8 @@ const handleSearch = () => {
 const resetQuery = () => {
   queryParams.adminId = ''
   queryParams.action = ''
-  queryParams.beginTime = ''
-  queryParams.endTime = ''
+  queryParams.startDate = ''
+  queryParams.endDate = ''
   timeRange.value = []
   handleSearch()
 }
