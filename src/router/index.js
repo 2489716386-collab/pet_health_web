@@ -5,6 +5,7 @@ import About from '../view/About.vue'
 
 import UserList from '../view/users/UserList.vue'
 import Blacklist from '../view/users/Blacklist.vue'
+import AdminLogs from '../view/logs/AdminLogs.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -23,6 +24,11 @@ const router = createRouter({
           path: '/users/blacklist',
           name: 'Blacklist',
           component: Blacklist
+        },
+        {
+          path: '/logs/AdminLogs',
+          name: 'AdminLogs',
+          component: AdminLogs
         }
       ]
     },

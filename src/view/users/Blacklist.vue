@@ -8,13 +8,22 @@
         <el-form-item label="昵称">
           <el-input v-model="queryParams.nickname" placeholder="请输入昵称" clearable />
         </el-form-item>
+        <el-form-item label="进入黑名单时间">
+          <el-date-picker
+            v-model="queryParams.createDate"
+            type="date"
+            placeholder="请选择明确日期"
+            value-format="YYYY-MM-DD"
+            clearable
+            @change="handleSearch"
+          />
+        </el-form-item>
+
         <el-form-item>
           <el-button type="primary" @click="handleSearch">查 询</el-button>
           <el-button @click="resetQuery">重 置</el-button>
-          <el-button type="success" :disabled="selectedIds.length === 0" @click="handleBatchUnban">
-            批量解封
-          </el-button>
         </el-form-item>
+
       </el-form>
 
       <el-table
@@ -27,7 +36,7 @@
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column prop="userId" label="被封禁用户ID" align="center" width="120" />
         <el-table-column prop="reason" label="封禁原因" align="center" show-overflow-tooltip />
-        <el-table-column prop="createTime" label="进入黑名单时间" align="center" width="180" />
+        <el-table-column prop="createTime" label="进入黑名单时间" align="center" width="140" />
         <el-table-column prop="expireTime" label="封禁过期时间" align="center" width="180">
           <template #default="scope">
             <span style="color: #F56C6C;">{{ scope.row.expireTime }}</span>
@@ -73,7 +82,8 @@ const queryParams = reactive({
   pageNum: 1,
   pageSize: 10,
   userId: '',
-  nickname: ''
+  nickname: '',
+  createDate: '' // 存储下拉框选中的天数
 })
 
 // 获取黑名单列表
@@ -93,11 +103,6 @@ const fetchList = async () => {
 // 表格多选框改变事件
 const handleSelectionChange = (selection) => {
   selectedIds.value = selection.map(item => item.userId)
-}
-
-// 批量解封操作
-const handleBatchUnban = () => {
-  executeUnban(selectedIds.value)
 }
 
 // 单个解封操作
@@ -128,7 +133,7 @@ const executeUnban = (userIds) => {
 
 // 查与重置
 const handleSearch = () => { queryParams.pageNum = 1; fetchList() }
-const resetQuery = () => { queryParams.userId = ''; queryParams.nickname = ''; handleSearch() }
+const resetQuery = () => { queryParams.userId = ''; queryParams.nickname = ''; queryParams.createDate = ''; handleSearch() }
 
 // 分页处理
 const handleSizeChange = (val) => { queryParams.pageSize = val; fetchList() }

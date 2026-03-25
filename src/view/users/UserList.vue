@@ -11,8 +11,8 @@
 
         <el-form-item label="角色" style="width: 30%">
           <el-select v-model="queryParams.role" placeholder="选择角色" clearable @change="handleSearch">
-            <el-option label="普通用户" value="0" />
-            <el-option label="管理员" value="1" />
+            <el-option label="普通用户" value="user" />
+            <el-option label="管理员" value="admin" />
           </el-select>
         </el-form-item>
 
@@ -39,8 +39,8 @@
         <el-table-column label="身份" align="center" width="120">
           <template #default="scope">
             <div v-if="scope.row">
-              <el-tag :type="scope.row.role === '1' ? 'danger' : 'success'">
-                {{ scope.row.role === '1' ? '管理员' : '普通用户' }}
+              <el-tag :type="scope.row.role === 'admin' ? 'danger' : 'success'">
+                {{ scope.row.role === 'admin' ? '管理员' : '普通用户' }}
               </el-tag>
             </div>
           </template>
