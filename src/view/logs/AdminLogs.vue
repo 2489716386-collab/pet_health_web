@@ -73,7 +73,7 @@ const timeRange = ref([]) // 用于绑定 el-date-picker 的数组
 // 查询参数
 const queryParams = reactive({
   pageNum: 1,
-  pageSize: 10,
+  pageSize: 20,
   adminId: '',
   action: '',
   startDate: '',

@@ -95,7 +95,7 @@ const dialogTitle = ref('')
 const formRef = ref(null)
 
 // 移除 initial
-const queryParams = reactive({ pageNum: 1, pageSize: 10, speciesType: '', breedName: '' })
+const queryParams = reactive({ pageNum: 1, pageSize: 20, speciesType: '', breedName: '' })
 const form = reactive({ breedId: null, speciesType: '猫', breedName: '' })
 
 const rules = {

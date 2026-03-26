@@ -81,7 +81,7 @@ const total = ref(0)
 const timeRange = ref([])
 
 const queryParams = reactive({
-  pageNum: 1, pageSize: 10, targetType: '', status: null, startDate: '', endDate: '', reason: ''
+  pageNum: 1, pageSize: 20, targetType: '', status: null, startDate: '', endDate: '', reason: ''
 })
 
 const fetchList = async () => {

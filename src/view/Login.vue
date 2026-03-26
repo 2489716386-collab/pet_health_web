@@ -96,7 +96,7 @@ const handleLogin = async () => {
           localStorage.setItem('token', res.data.token)
 
           // 【破案核心】根据你 router/index.js 的配置，首页路径是 '/'
-          router.push('/')
+          router.push('/home')
         } else {
           ElMessage.error(res.msg || '登录失败，请检查账号或密码')
         }

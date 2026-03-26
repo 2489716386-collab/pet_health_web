@@ -114,7 +114,7 @@ const total = ref(0)
 
 const queryParams = reactive({
   pageNum: 1,
-  pageSize: 10,
+  pageSize: 20,
   userId: '',
   nickname: '',
   role: null // 初始为 null 表示不限角色

@@ -113,7 +113,7 @@ const timeRange = ref([])
 const dialogVisible = ref(false)
 const formRef = ref(null)
 
-const queryParams = reactive({ pageNum: 1, pageSize: 10, type: null, content: '', startDate: '', endDate: '' })
+const queryParams = reactive({ pageNum: 1, pageSize: 20, type: null, content: '', startDate: '', endDate: '' })
 // 表单中的 sendTarget 是前端辅助字段，不传给后端
 const form = reactive({ type: 1, sendTarget: 'ALL', targetUserId: '', title: '', content: '' })
 

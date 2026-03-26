@@ -99,7 +99,7 @@ const timeRange = ref([])
 
 const queryParams = reactive({
   pageNum: 1,
-  pageSize: 10,
+  pageSize: 20,
   postType: null,
   status: null,
   startDate: '',

@@ -80,7 +80,7 @@ const selectedIds = ref([]) // 选中的被封禁用户ID列表
 
 const queryParams = reactive({
   pageNum: 1,
-  pageSize: 10,
+  pageSize: 20,
   userId: '',
   nickname: '',
   createDate: '' // 存储下拉框选中的天数

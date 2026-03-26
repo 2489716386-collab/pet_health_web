@@ -70,7 +70,7 @@ const dialogTitle = ref('')
 const formRef = ref(null)
 
 // 【修复】：所有的 word 替换为 wordContent
-const queryParams = reactive({ pageNum: 1, pageSize: 10, wordContent: '' })
+const queryParams = reactive({ pageNum: 1, pageSize: 20, wordContent: '' })
 // 【修复】：wordId 替换为 id，word 替换为 wordContent
 const form = reactive({ id: null, wordContent: '' })
 const rules = { wordContent: [{ required: true, message: '敏感词不能为空', trigger: 'blur' }] }
