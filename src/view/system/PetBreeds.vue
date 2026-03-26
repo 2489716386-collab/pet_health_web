@@ -60,6 +60,7 @@
           <el-radio-group v-model="form.species">
             <el-radio label="猫">猫</el-radio>
             <el-radio label="狗">狗</el-radio>
+            <el-radio label="仓鼠">仓鼠</el-radio>
             <el-radio label="其他">其他</el-radio>
           </el-radio-group>
         </el-form-item>

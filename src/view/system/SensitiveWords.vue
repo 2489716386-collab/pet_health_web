@@ -3,7 +3,7 @@
     <el-card>
       <el-form :inline="true" :model="queryParams" class="search-form">
         <el-form-item label="敏感词">
-          <el-input v-model="queryParams.word" placeholder="模糊搜索敏感词" clearable />
+          <el-input v-model="queryParams.wordContent" placeholder="模糊搜索敏感词" clearable />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">查 询</el-button>
@@ -15,13 +15,13 @@
 
       <el-table :data="tableData" border stripe v-loading="loading" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
-        <el-table-column prop="wordId" label="ID" align="center" width="80" />
-        <el-table-column prop="word" label="敏感词内容" align="center" />
-        <el-table-column prop="createTime" label="创建时间" align="center" width="180" />
+        <el-table-column prop="id" label="ID" align="center" width="80" />
+        <el-table-column prop="wordContent" label="敏感词内容" align="center" />
+
         <el-table-column label="操作" align="center" width="150" fixed="right">
           <template #default="scope">
             <el-button type="primary" size="small" @click="handleEdit(scope.row)">修改</el-button>
-            <el-button type="danger" size="small" @click="handleDelete(scope.row.wordId)">删除</el-button>
+            <el-button type="danger" size="small" @click="handleDelete(scope.row.id)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -41,8 +41,8 @@
 
     <el-dialog :title="dialogTitle" v-model="dialogVisible" width="400px">
       <el-form :model="form" ref="formRef" :rules="rules" label-width="80px">
-        <el-form-item label="敏感词" prop="word">
-          <el-input v-model="form.word" placeholder="请输入敏感词内容" />
+        <el-form-item label="敏感词" prop="wordContent">
+          <el-input v-model="form.wordContent" placeholder="请输入敏感词内容" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -69,11 +69,12 @@ const dialogVisible = ref(false)
 const dialogTitle = ref('')
 const formRef = ref(null)
 
-const queryParams = reactive({ pageNum: 1, pageSize: 10, word: '' })
-const form = reactive({ wordId: null, word: '' })
-const rules = { word: [{ required: true, message: '敏感词不能为空', trigger: 'blur' }] }
+// 【修复】：所有的 word 替换为 wordContent
+const queryParams = reactive({ pageNum: 1, pageSize: 10, wordContent: '' })
+// 【修复】：wordId 替换为 id，word 替换为 wordContent
+const form = reactive({ id: null, wordContent: '' })
+const rules = { wordContent: [{ required: true, message: '敏感词不能为空', trigger: 'blur' }] }
 
-// 获取列表
 const fetchList = async () => {
   loading.value = true
   try {
@@ -85,34 +86,34 @@ const fetchList = async () => {
   } finally { loading.value = false }
 }
 
-// 搜索与重置
 const handleSearch = () => { queryParams.pageNum = 1; fetchList() }
-const resetQuery = () => { queryParams.word = ''; handleSearch() }
+const resetQuery = () => { queryParams.wordContent = ''; handleSearch() }
 const handleSizeChange = (val) => { queryParams.pageSize = val; fetchList() }
 const handleCurrentChange = (val) => { queryParams.pageNum = val; fetchList() }
 
-// 选择复选框
+// 【修复】：提取 item.id
 const handleSelectionChange = (selection) => {
-  selectedIds.value = selection.map(item => item.wordId)
+  selectedIds.value = selection.map(item => item.id)
 }
 
-// 弹窗操作
 const handleAdd = () => {
   dialogTitle.value = '新增敏感词'
-  Object.assign(form, { wordId: null, word: '' })
-  dialogVisible.value = true
-}
-const handleEdit = (row) => {
-  dialogTitle.value = '修改敏感词'
-  Object.assign(form, { wordId: row.wordId, word: row.word })
+  Object.assign(form, { id: null, wordContent: '' })
   dialogVisible.value = true
 }
 
-// 提交表单
+const handleEdit = (row) => {
+  dialogTitle.value = '修改敏感词'
+  // 【修复】：赋值 id 和 wordContent
+  Object.assign(form, { id: row.id, wordContent: row.wordContent })
+  dialogVisible.value = true
+}
+
 const submitForm = () => {
   formRef.value.validate(async (valid) => {
     if (valid) {
-      const isEdit = !!form.wordId
+      // 【修复】：判断是不是编辑模式，依据是 form.id 存不存在
+      const isEdit = !!form.id
       const url = isEdit ? '/sensitive-words/admin/update' : '/sensitive-words/admin/add'
       const method = isEdit ? 'put' : 'post'
       const res = await request[method](url, form)
@@ -120,15 +121,15 @@ const submitForm = () => {
         ElMessage.success(isEdit ? '修改成功' : '新增成功')
         dialogVisible.value = false
         fetchList()
+      } else {
+        ElMessage.error(res.msg || '操作失败')
       }
     }
   })
 }
 
-// 删除操作 (支持单删和批量删除)
 const doDelete = (ids) => {
   ElMessageBox.confirm('确认要删除选中的敏感词吗？', '警告', { type: 'warning' }).then(async () => {
-    // 假设后端接收的是一个数组
     const res = await request.post('/sensitive-words/admin/delete', ids)
     if (res.code === 200 || res.code === 1) {
       ElMessage.success('删除成功')
@@ -136,6 +137,7 @@ const doDelete = (ids) => {
     }
   }).catch(() => {})
 }
+
 const handleDelete = (id) => doDelete([id])
 const handleBatchDelete = () => doDelete(selectedIds.value)
 

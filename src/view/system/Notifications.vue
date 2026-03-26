@@ -31,12 +31,16 @@
       </el-form>
 
       <el-table :data="tableData" border stripe v-loading="loading">
-        <el-table-column prop="notificationId" label="通知ID" align="center" width="80" />
-        <el-table-column prop="type" label="通知类型" align="center" width="120">
+        <el-table-column prop="noticeId" label="通知ID" align="center" width="80" />
+        <el-table-column prop="noticeType" label="通知类型" align="center" width="130">
           <template #default="scope">
-            <el-tag :type="scope.row.type === 1 ? 'info' : 'danger'">
-              {{ scope.row.type === 1 ? '系统维护类' : '违规提醒类' }}
+            <el-tag v-if="scope.row.noticeType === 1 || scope.row.noticeType === 'SYSTEM_MAINTENANCE'" type="info">
+              系统维护类
             </el-tag>
+            <el-tag v-else-if="scope.row.noticeType === 2 || scope.row.noticeType === 'VIOLATION_WARNING'" type="danger">
+              违规提醒类
+            </el-tag>
+            <el-tag v-else type="warning">未知类型</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="title" label="通知标题" align="center" width="200" show-overflow-tooltip />
@@ -153,7 +157,7 @@ const submitForm = () => {
       ElMessageBox.confirm('通知发送后无法撤回，确定要发送吗？', '提示', { type: 'warning' }).then(async () => {
         // 组装传给后端的数据：如果选了全部用户，把 targetUserId 设为 0 或 null
         const submitData = {
-          type: form.type,
+          noticeType: form.type === 1 ? 'SYSTEM_MAINTENANCE' : 'VIOLATION_WARNING',
           title: form.title,
           content: form.content,
           targetUserId: form.sendTarget === 'ALL' ? 0 : Number(form.targetUserId)
