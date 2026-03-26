@@ -9,6 +9,9 @@ import AdminLogs from '../view/logs/AdminLogs.vue'
 import CommunityPosts from '../view/community/CommunityPosts.vue'
 import Comments from '../view/community/Comments.vue'
 import Reports from '../view/community/Reports.vue'
+import Notifications from '../view/system/Notifications.vue'
+import SensitiveWords from '../view/system/SensitiveWords.vue'
+import PetBreeds from '../view/system/PetBreeds.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -47,6 +50,21 @@ const router = createRouter({
           path: '/community/reports',
           name: 'Reports',
           component: Reports
+        },
+        {
+          path: '/system/notifications',
+          name: 'Notifications',
+          component: Notifications
+        },
+        {
+          path: '/system/sensitive-words',
+          name: 'SensitiveWords',
+          component: SensitiveWords
+        },
+        {
+          path: '/system/breeds',
+          name: 'PetBreeds',
+          component: PetBreeds
         }
       ]
     },

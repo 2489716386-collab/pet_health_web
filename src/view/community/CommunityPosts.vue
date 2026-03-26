@@ -8,13 +8,15 @@
             <el-option label="视频" :value="1" />
           </el-select>
         </el-form-item>
+
         <el-form-item label="审核状态">
           <el-select v-model="queryParams.status" placeholder="全部" clearable style="width: 120px">
-            <el-option label="待审核" :value="0" />
-            <el-option label="已发布" :value="1" />
-            <el-option label="违规拦截" :value="2" />
+            <el-option label="待审核" value="PENDING" />
+            <el-option label="已发布" value="APPROVED" />
+            <el-option label="违规拦截" value="REJECTED" />
           </el-select>
         </el-form-item>
+
         <el-form-item label="发布时间">
           <el-date-picker
             v-model="timeRange"
@@ -45,13 +47,15 @@
             <el-tag :type="scope.row.reportCount >= 5 ? 'danger' : 'info'">{{ scope.row.reportCount || 0 }}</el-tag>
           </template>
         </el-table-column>
-        <el-form-item label="审核状态">
-          <el-select v-model="queryParams.status" placeholder="全部" clearable style="width: 120px">
-            <el-option label="待审核" value="PENDING" />
-            <el-option label="已发布" value="APPROVED" />
-            <el-option label="违规拦截" value="REJECTED" />
-          </el-select>
-        </el-form-item>
+
+        <el-table-column prop="status" label="状态" align="center" width="100">
+          <template #default="scope">
+            <el-tag v-if="scope.row.status === 0" type="warning">待审核</el-tag>
+            <el-tag v-else-if="scope.row.status === 1" type="success">已发布</el-tag>
+            <el-tag v-else-if="scope.row.status === 2" type="danger">违规拦截</el-tag>
+          </template>
+        </el-table-column>
+
         <el-table-column prop="createTime" label="发布时间" align="center" width="170" />
         <el-table-column label="操作" align="center" width="180" fixed="right">
           <template #default="scope">
@@ -97,7 +101,7 @@ const queryParams = reactive({
   pageNum: 1,
   pageSize: 10,
   postType: null,
-  status: null, // 默认不传即查全部，如果想默认查待审核可改为 0
+  status: null,
   startDate: '',
   endDate: '',
   content: ''
@@ -106,7 +110,6 @@ const queryParams = reactive({
 const fetchList = async () => {
   loading.value = true
   try {
-    // 假设你的 Controller 前缀是 /community-posts
     const res = await request.get('/community-posts/admin/page', { params: queryParams })
     if (res.code === 200 || res.code === 1) {
       tableData.value = res.data.list || res.data.records || []
@@ -140,7 +143,9 @@ const handleCurrentChange = (val) => { queryParams.pageNum = val; fetchList() }
 
 const handleAudit = (postId, status) => {
   const actionText = status === 1 ? '放行(显示)' : '拦截(封禁)'
+  // 【这里你写的很对】：审核按钮的操作，被正确转换为了后端需要的枚举字符串
   const statusEnumStr = status === 1 ? 'APPROVED' : 'REJECTED'
+
   ElMessageBox.confirm(`确定要将该动态设为 ${actionText} 吗？`, '审核提示', { type: 'warning' }).then(async () => {
     const res = await request.post(`/community-posts/admin/audit?status=${statusEnumStr}`, [postId])
     if (res.code === 200 || res.code === 1) {
@@ -149,14 +154,26 @@ const handleAudit = (postId, status) => {
     } else {
       ElMessage.error(res.msg || '审核失败')
     }
-  }).catch(() => {})
+  }).catch(() => {
+  })
 }
 
-onMounted(() => { fetchList() })
+onMounted(() => {
+  fetchList()
+})
 </script>
 
 <style scoped>
-.app-container { padding: 20px; }
-.search-form { margin-bottom: 20px; }
-.pagination-container { margin-top: 20px; text-align: right; }
+.app-container {
+  padding: 20px;
+}
+
+.search-form {
+  margin-bottom: 20px;
+}
+
+.pagination-container {
+  margin-top: 20px;
+  text-align: right;
+}
 </style>
