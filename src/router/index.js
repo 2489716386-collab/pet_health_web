@@ -6,6 +6,9 @@ import About from '../view/About.vue'
 import UserList from '../view/users/UserList.vue'
 import Blacklist from '../view/users/Blacklist.vue'
 import AdminLogs from '../view/logs/AdminLogs.vue'
+import CommunityPosts from '../view/community/CommunityPosts.vue'
+import Comments from '../view/community/Comments.vue'
+import Reports from '../view/community/Reports.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -29,6 +32,21 @@ const router = createRouter({
           path: '/logs/AdminLogs',
           name: 'AdminLogs',
           component: AdminLogs
+        },
+        {
+          path: '/community/posts',
+          name: 'CommunityPosts',
+          component: CommunityPosts
+        },
+        {
+          path: '/community/comments',
+          name: 'Comments',
+          component: Comments
+        },
+        {
+          path: '/community/reports',
+          name: 'Reports',
+          component: Reports
         }
       ]
     },
