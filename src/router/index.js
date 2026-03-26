@@ -12,15 +12,26 @@ import Reports from '../view/community/Reports.vue'
 import Notifications from '../view/system/Notifications.vue'
 import SensitiveWords from '../view/system/SensitiveWords.vue'
 import PetBreeds from '../view/system/PetBreeds.vue'
+import Dashboard from '../view/Dashboard.vue'
+import Login from '@/view/Login.vue'
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
+    { path: '/', redirect: '/login' },
+    { path: '/login', name: 'Login', component: Login },
     {
-      path: '/',
+      path: '/home',
       name: 'home',
       component: Home,
+      redirect: '/dashboard',
       children: [
+        {
+          path: '/dashboard',
+          name: 'Dashboard',
+          component: Dashboard,
+          meta: { title: '工作台首页' }
+        },
         {
           path: '/users/list',
           name: 'UserList',
@@ -32,7 +43,7 @@ const router = createRouter({
           component: Blacklist
         },
         {
-          path: '/logs/AdminLogs',
+          path: '/logs/admin-logs',
           name: 'AdminLogs',
           component: AdminLogs
         },
@@ -62,7 +73,7 @@ const router = createRouter({
           component: SensitiveWords
         },
         {
-          path: '/system/breeds',
+          path: '/system/pet-breeds',
           name: 'PetBreeds',
           component: PetBreeds
         }

@@ -88,6 +88,8 @@ const handleLogin = async () => {
 
         // 【破案核心】拦截器放行后，res 就是后端返回的对象，直接判断 code 是否为 1
         if (res && (res.code === 200 || res.code === 1 || res.msg === 'success')) {
+          localStorage.setItem('token', res.data)
+          localStorage.setItem('username', loginForm.username)
           ElMessage.success('登录成功，欢迎回来！')
 
           // 【破案核心】后端 data 直接就是 token 字符串
