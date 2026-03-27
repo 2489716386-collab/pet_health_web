@@ -5,9 +5,6 @@
         <el-form-item label="用户ID">
           <el-input v-model="queryParams.userId" placeholder="请输入被封禁用户ID" clearable />
         </el-form-item>
-        <el-form-item label="昵称">
-          <el-input v-model="queryParams.nickname" placeholder="请输入昵称" clearable />
-        </el-form-item>
         <el-form-item label="进入黑名单时间">
           <el-date-picker
             v-model="queryParams.createDate"
@@ -82,7 +79,6 @@ const queryParams = reactive({
   pageNum: 1,
   pageSize: 20,
   userId: '',
-  nickname: '',
   createDate: '' // 存储下拉框选中的天数
 })
 

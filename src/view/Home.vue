@@ -2,7 +2,7 @@
   <el-container style="height: 100vh;">
     <el-aside width="230px" class="aside">
       <div class="logo">
-        <img src="../assets/logo.png" alt="logo" class="logo-img" v-if="false" /> <h2>宠健后台管理</h2>
+        <img src="../assets/logo.png" alt="logo" class="logo-img" v-if="false" /> <h2>宠物健康小程序后台管理</h2>
       </div>
 
       <el-menu

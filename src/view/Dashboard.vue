@@ -11,25 +11,13 @@
     </el-card>
 
     <el-row :gutter="20" class="data-cards">
-      <el-col :span="6">
-        <el-card shadow="hover" class="data-card user-bg">
-          <div class="data-title">今日新增用户</div>
-          <div class="data-value">{{ stats.dailyUsers }} <span class="unit">人</span></div>
-        </el-card>
-      </el-col>
-      <el-col :span="6">
+      <el-col :span="12">
         <el-card shadow="hover" class="data-card user-bg">
           <div class="data-title">本月新增用户</div>
           <div class="data-value">{{ stats.monthlyUsers }} <span class="unit">人</span></div>
         </el-card>
       </el-col>
-      <el-col :span="6">
-        <el-card shadow="hover" class="data-card post-bg">
-          <div class="data-title">今日新增动态</div>
-          <div class="data-value">{{ stats.dailyPosts }} <span class="unit">条</span></div>
-        </el-card>
-      </el-col>
-      <el-col :span="6">
+      <el-col :span="12">
         <el-card shadow="hover" class="data-card post-bg">
           <div class="data-title">本月新增动态</div>
           <div class="data-value">{{ stats.monthlyPosts }} <span class="unit">条</span></div>
@@ -42,7 +30,7 @@
         <el-card shadow="never" class="chart-card">
           <template #header>
             <div class="card-header">
-              <span>📊 用户与动态增长趋势 (近7天模拟数据)</span>
+              <span>📊 用户与动态增长趋势 </span>
             </div>
           </template>
           <div ref="chartRef" style="height: 320px;"></div>
@@ -91,19 +79,32 @@ const greeting = computed(() => {
 
 // 3. 核心统计数据 (模拟数据，后期需要后端提供一个统一看板接口对接)
 const stats = ref({
-  dailyUsers: 15,
-  monthlyUsers: 188,
-  dailyPosts: 45,
-  monthlyPosts: 512
+  monthlyUsers: 0,
+  monthlyPosts: 0
 })
+
+// 从后端获取本月真实统计数据
+const fetchStatsData = async () => {
+  try {
+    const res = await request.get('/dashboard/stats')
+    if (res.code === 200 || res.code === 1) {
+      stats.value.monthlyUsers = res.data.monthlyUsers || 0
+      stats.value.monthlyPosts = res.data.monthlyPosts || 0
+    }
+  } catch (error) {
+    console.error('获取统计数据失败:', error)
+  }
+}
 
 // 4. ECharts 图表渲染逻辑
 const chartRef = ref(null)
 let myChart = null
 
-const initChart = () => {
+const initChart = (dates, userCounts, postCounts) => {
   if (chartRef.value) {
-    myChart = echarts.init(chartRef.value)
+    if (!myChart) {
+      myChart = echarts.init(chartRef.value)
+    }
     const option = {
       tooltip: { trigger: 'axis' },
       legend: { data: ['新增用户', '新增动态'], right: 20 },
@@ -111,7 +112,7 @@ const initChart = () => {
       xAxis: {
         type: 'category',
         boundaryGap: false,
-        data: ['03-20', '03-21', '03-22', '03-23', '03-24', '03-25', '03-26'] // 模拟日期
+        data: dates // 替换为真实日期
       },
       yAxis: { type: 'value' },
       series: [
@@ -127,7 +128,7 @@ const initChart = () => {
               { offset: 1, color: 'rgba(79, 172, 254, 0.0)' }
             ])
           },
-          data: [5, 12, 8, 15, 22, 18, 15] // 模拟数据
+          data: userCounts // 替换为真实新增用户数
         },
         {
           name: '新增动态',
@@ -141,13 +142,36 @@ const initChart = () => {
               { offset: 1, color: 'rgba(118, 75, 162, 0.0)' }
             ])
           },
-          data: [30, 45, 38, 55, 62, 70, 45] // 模拟数据
+          data: postCounts // 替换为真实新增动态数
         }
       ]
     }
     myChart.setOption(option)
   }
 }
+
+const fetchTrendData = async () => {
+  try {
+    const res = await request.get('/dashboard/trend')
+    if (res.code === 200 || res.code === 1) {
+      const { dates, userCounts, postCounts } = res.data
+      // 拿到后端数据后，初始化/更新图表
+      initChart(dates, userCounts, postCounts)
+    }
+  } catch (error) {
+    console.error('获取图表数据失败:', error)
+    // 接口请求失败时，可以显示默认空数据或报错处理
+    initChart([], [], [])
+  }
+}
+
+onMounted(() => {
+  fetchTrendData() // 之前的趋势图数据
+  fetchStatsData() // <--- 新增：调用获取卡片数据的函数
+  fetchNotifications() // 之前的通知数据
+  // 监听窗口大小变化，让图表自适应
+  window.addEventListener('resize', () => myChart && myChart.resize())
+})
 
 // 5. 获取最新通知
 const noticeList = ref([])
