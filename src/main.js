@@ -5,6 +5,25 @@ import 'element-plus/dist/index.css'
 import router from './router'
 // 导入你封装的 axios 实例（注意路径是否正确）
 import request from '@/axios'
+const debounce = (fn, delay) => {
+  let timer = null
+  return function () {
+    const context = this
+    const args = arguments
+    clearTimeout(timer)
+    timer = setTimeout(function () {
+      fn.apply(context, args)
+    }, delay)
+  }
+}
+
+const _ResizeObserver = window.ResizeObserver
+window.ResizeObserver = class ResizeObserver extends _ResizeObserver {
+  constructor (callback) {
+    callback = debounce(callback, 16)
+    super(callback)
+  }
+}
 
 // 创建 Vue 3 应用实例
 const app = createApp(App)

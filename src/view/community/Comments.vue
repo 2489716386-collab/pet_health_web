@@ -35,7 +35,14 @@
         <el-table-column prop="content" label="评论内容" align="center" show-overflow-tooltip />
         <el-table-column prop="reportCount" label="被举报次数" align="center" width="100">
           <template #default="scope">
-            <el-tag :type="scope.row.reportCount >= 5 ? 'danger' : 'info'">{{ scope.row.reportCount || 0 }}</el-tag>
+            <el-tag
+              :type="scope.row.reportCount >= 5 ? 'danger' : 'info'"
+              :style="{ cursor: scope.row.reportCount > 0 ? 'pointer' : 'default' }"
+              @click="handleViewReports(scope.row.commentId, scope.row.reportCount)"
+              title="点击查看举报详情"
+            >
+              {{ scope.row.reportCount || 0 }}
+            </el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="status" label="状态" align="center" width="100">
@@ -67,6 +74,20 @@
         />
       </div>
     </el-card>
+
+    <el-drawer
+      v-model="drawerVisible"
+      :title="drawerTitle"
+      direction="rtl"
+      size="40%"
+      class="report-drawer"
+    >
+      <el-table :data="reportList" border stripe v-loading="reportLoading" size="small">
+        <el-table-column prop="userId" label="举报人ID" align="center" width="100" />
+        <el-table-column prop="reason" label="举报理由" show-overflow-tooltip />
+        <el-table-column prop="createTime" label="举报时间" align="center" width="170" />
+      </el-table>
+    </el-drawer>
   </div>
 </template>
 
@@ -84,9 +105,16 @@ const queryParams = reactive({
   pageNum: 1, pageSize: 20, status: null, startDate: '', endDate: '', content: ''
 })
 
+// 抽屉变量
+const drawerVisible = ref(false)
+const drawerTitle = ref('')
+const reportLoading = ref(false)
+const reportList = ref([])
+
 const fetchList = async () => {
   loading.value = true
   try {
+    // 【修复】恢复为你原本正确的请求路径
     const res = await request.get('/comments/admin/page', { params: queryParams })
     if (res.code === 200 || res.code === 1) {
       tableData.value = res.data.list || res.data.records || []
@@ -107,6 +135,7 @@ const resetQuery = () => {
 const handleSizeChange = (val) => { queryParams.pageSize = val; fetchList() }
 const handleCurrentChange = (val) => { queryParams.pageNum = val; fetchList() }
 
+// 【修复】恢复为你原本正确的审核逻辑
 const handleAudit = (commentId, status) => {
   const actionText = status === 1 ? '放行(显示)' : '拦截(封禁)'
   const statusEnumStr = status === 1 ? 'APPROVED' : 'REJECTED'
@@ -119,6 +148,31 @@ const handleAudit = (commentId, status) => {
   }).catch(() => {})
 }
 
+// 获取抽屉举报数据
+const handleViewReports = async (commentId, count) => {
+  if (!count || count === 0) return
+
+  drawerVisible.value = true
+  drawerTitle.value = `评论 ID: ${commentId} 的举报详情`
+  reportLoading.value = true
+  reportList.value = []
+
+  try {
+    const res = await request.get('/reports/admin/page', {
+      params: { targetType: 'comment', targetId: commentId, pageNum: 1, pageSize: 1000, status: 0 }
+    })
+    if (res.code === 200 || res.code === 1) {
+      reportList.value = res.data.list || res.data.records || []
+    } else {
+      ElMessage.error('获取举报详情失败')
+    }
+  } catch (error) {
+    console.error('获取举报详情失败:', error)
+  } finally {
+    reportLoading.value = false
+  }
+}
+
 onMounted(() => { fetchList() })
 </script>
 
@@ -126,4 +180,5 @@ onMounted(() => { fetchList() })
 .app-container { padding: 20px; }
 .search-form { margin-bottom: 20px; }
 .pagination-container { margin-top: 20px; text-align: right; }
+:deep(.report-drawer .el-drawer__body) { padding: 10px 20px 20px 20px; }
 </style>

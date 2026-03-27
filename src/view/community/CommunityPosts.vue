@@ -8,7 +8,6 @@
             <el-option label="视频" :value="1" />
           </el-select>
         </el-form-item>
-
         <el-form-item label="审核状态">
           <el-select v-model="queryParams.status" placeholder="全部" clearable style="width: 120px">
             <el-option label="待审核" value="PENDING" />
@@ -16,7 +15,6 @@
             <el-option label="违规拦截" value="REJECTED" />
           </el-select>
         </el-form-item>
-
         <el-form-item label="发布时间">
           <el-date-picker
             v-model="timeRange"
@@ -44,10 +42,16 @@
         <el-table-column prop="content" label="动态内容" align="center" show-overflow-tooltip />
         <el-table-column prop="reportCount" label="被举报次数" align="center" width="100">
           <template #default="scope">
-            <el-tag :type="scope.row.reportCount >= 5 ? 'danger' : 'info'">{{ scope.row.reportCount || 0 }}</el-tag>
+            <el-tag
+              :type="scope.row.reportCount >= 5 ? 'danger' : 'info'"
+              :style="{ cursor: scope.row.reportCount > 0 ? 'pointer' : 'default' }"
+              @click="handleViewReports(scope.row.postId, scope.row.reportCount)"
+              title="点击查看举报详情"
+            >
+              {{ scope.row.reportCount || 0 }}
+            </el-tag>
           </template>
         </el-table-column>
-
         <el-table-column prop="status" label="状态" align="center" width="100">
           <template #default="scope">
             <el-tag v-if="scope.row.status === 0" type="warning">待审核</el-tag>
@@ -55,18 +59,11 @@
             <el-tag v-else-if="scope.row.status === 2" type="danger">违规拦截</el-tag>
           </template>
         </el-table-column>
-
         <el-table-column prop="createTime" label="发布时间" align="center" width="170" />
         <el-table-column label="操作" align="center" width="180" fixed="right">
           <template #default="scope">
-            <el-button
-              v-if="scope.row.status === 0"
-              type="success" size="small"
-              @click="handleAudit(scope.row.postId, 1)">放行</el-button>
-            <el-button
-              v-if="scope.row.status === 0"
-              type="danger" size="small"
-              @click="handleAudit(scope.row.postId, 2)">拦截</el-button>
+            <el-button v-if="scope.row.status === 0" type="success" size="small" @click="handleAudit(scope.row.postId, 1)">放行</el-button>
+            <el-button v-if="scope.row.status === 0" type="danger" size="small" @click="handleAudit(scope.row.postId, 2)">拦截</el-button>
             <span v-if="scope.row.status !== 0" style="color: #909399; font-size: 13px;">已处理</span>
           </template>
         </el-table-column>
@@ -84,6 +81,20 @@
         />
       </div>
     </el-card>
+
+    <el-drawer
+      v-model="drawerVisible"
+      :title="drawerTitle"
+      direction="rtl"
+      size="40%"
+      class="report-drawer"
+    >
+      <el-table :data="reportList" border stripe v-loading="reportLoading" size="small">
+        <el-table-column prop="userId" label="举报人ID" align="center" width="100" />
+        <el-table-column prop="reason" label="举报理由" show-overflow-tooltip />
+        <el-table-column prop="createTime" label="举报时间" align="center" width="170" />
+      </el-table>
+    </el-drawer>
   </div>
 </template>
 
@@ -98,14 +109,14 @@ const total = ref(0)
 const timeRange = ref([])
 
 const queryParams = reactive({
-  pageNum: 1,
-  pageSize: 20,
-  postType: null,
-  status: null,
-  startDate: '',
-  endDate: '',
-  content: ''
+  pageNum: 1, pageSize: 20, postType: null, status: null, startDate: '', endDate: '', content: ''
 })
+
+// 抽屉变量
+const drawerVisible = ref(false)
+const drawerTitle = ref('')
+const reportLoading = ref(false)
+const reportList = ref([])
 
 const fetchList = async () => {
   loading.value = true
@@ -141,21 +152,45 @@ const resetQuery = () => {
 const handleSizeChange = (val) => { queryParams.pageSize = val; fetchList() }
 const handleCurrentChange = (val) => { queryParams.pageNum = val; fetchList() }
 
+// 【修复】恢复为你原本正确的审核逻辑
 const handleAudit = (postId, status) => {
   const actionText = status === 1 ? '放行(显示)' : '拦截(封禁)'
-  // 【这里你写的很对】：审核按钮的操作，被正确转换为了后端需要的枚举字符串
   const statusEnumStr = status === 1 ? 'APPROVED' : 'REJECTED'
 
   ElMessageBox.confirm(`确定要将该动态设为 ${actionText} 吗？`, '审核提示', { type: 'warning' }).then(async () => {
     const res = await request.post(`/community-posts/admin/audit?status=${statusEnumStr}`, [postId])
     if (res.code === 200 || res.code === 1) {
       ElMessage.success('审核成功')
-      fetchList() // 刷新列表
+      fetchList()
     } else {
       ElMessage.error(res.msg || '审核失败')
     }
-  }).catch(() => {
-  })
+  }).catch(() => {})
+}
+
+// 获取抽屉举报数据
+const handleViewReports = async (postId, count) => {
+  if (!count || count === 0) return
+
+  drawerVisible.value = true
+  drawerTitle.value = `动态 ID: ${postId} 的举报详情`
+  reportLoading.value = true
+  reportList.value = []
+
+  try {
+    const res = await request.get('/reports/admin/page', {
+      params: { targetType: 'post', targetId: postId, pageNum: 1, pageSize: 1000, status: 0 }
+    })
+    if (res.code === 200 || res.code === 1) {
+      reportList.value = res.data.list || res.data.records || []
+    } else {
+      ElMessage.error('获取举报详情失败')
+    }
+  } catch (error) {
+    console.error('获取举报详情失败:', error)
+  } finally {
+    reportLoading.value = false
+  }
 }
 
 onMounted(() => {
@@ -164,16 +199,8 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.app-container {
-  padding: 20px;
-}
-
-.search-form {
-  margin-bottom: 20px;
-}
-
-.pagination-container {
-  margin-top: 20px;
-  text-align: right;
-}
+.app-container { padding: 20px; }
+.search-form { margin-bottom: 20px; }
+.pagination-container { margin-top: 20px; text-align: right; }
+:deep(.report-drawer .el-drawer__body) { padding: 10px 20px 20px 20px; }
 </style>
