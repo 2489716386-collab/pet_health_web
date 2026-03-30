@@ -75,15 +75,9 @@
       </div>
     </el-card>
 
-    <el-drawer
-      v-model="drawerVisible"
-      :title="drawerTitle"
-      direction="rtl"
-      size="40%"
-      class="report-drawer"
-    >
+    <el-drawer v-model="drawerVisible" :title="drawerTitle" direction="rtl" size="40%" class="report-drawer">
       <el-table :data="reportList" border stripe v-loading="reportLoading" size="small">
-        <el-table-column prop="userId" label="举报人ID" align="center" width="100" />
+        <el-table-column prop="reporterId" label="举报人ID" align="center" width="100" />
         <el-table-column prop="reason" label="举报理由" show-overflow-tooltip />
         <el-table-column prop="createTime" label="举报时间" align="center" width="170" />
       </el-table>
@@ -151,26 +145,16 @@ const handleAudit = (commentId, status) => {
 // 获取抽屉举报数据
 const handleViewReports = async (commentId, count) => {
   if (!count || count === 0) return
-
   drawerVisible.value = true
   drawerTitle.value = `评论 ID: ${commentId} 的举报详情`
   reportLoading.value = true
   reportList.value = []
 
   try {
-    const res = await request.get('/reports/admin/page', {
-      params: { targetType: 'comment', targetId: commentId, pageNum: 1, pageSize: 1000, status: 0 }
-    })
-    if (res.code === 200 || res.code === 1) {
-      reportList.value = res.data.list || res.data.records || []
-    } else {
-      ElMessage.error('获取举报详情失败')
-    }
-  } catch (error) {
-    console.error('获取举报详情失败:', error)
-  } finally {
-    reportLoading.value = false
-  }
+    // 【修复】传 'comment'
+    const res = await request.get('/reports/admin/page', { params: { targetType: 'comment', targetId: commentId, pageNum: 1, pageSize: 1000 } })
+    if (res.code === 200 || res.code === 1) reportList.value = res.data.list || res.data.records || []
+  } finally { reportLoading.value = false }
 }
 
 onMounted(() => { fetchList() })
