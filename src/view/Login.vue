@@ -117,7 +117,7 @@ const handleLogin = async () => {
   align-items: center;
   height: 100vh;
 
-  background-image: url('https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAER-uBpv7WqhIi4RhN0mWkvFKQTMLcteAACVh8AAiLe-FXuWoRfZ6aB3joE.jpg');
+  background-image: url('https://free.boltp.com/2026/03/31/69cb54aee89b7.webp');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
