@@ -32,6 +32,7 @@
           <el-menu-item index="/system/notifications"><el-icon><Bell /></el-icon><span>系统通知</span></el-menu-item>
           <el-menu-item index="/system/sensitive-words"><el-icon><Mute /></el-icon><span>敏感词字典</span></el-menu-item>
           <el-menu-item index="/system/pet-breeds"><el-icon><Operation /></el-icon><span>宠物品种字典</span></el-menu-item>
+          <el-menu-item index="/system/knowledge"><el-icon><Notebook /></el-icon><span>养护知识库</span></el-menu-item>
         </el-menu-item-group>
 
         <el-menu-item-group title="日志管理">
@@ -66,7 +67,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { House, User, Lock, Document, ChatLineRound, Warning, Bell, Mute, Operation, Reading } from '@element-plus/icons-vue'
+import { House, User, Lock, Document, ChatLineRound, Warning, Bell, Mute, Operation, Reading, Notebook } from '@element-plus/icons-vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
 
 const router = useRouter()

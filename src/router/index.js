@@ -80,6 +80,12 @@ const router = createRouter({
       ]
     },
     {
+      path: '/system/knowledge',
+      name: 'CareKnowledgeBase',
+      component: () => import('@/view/system/CareKnowledgeBase.vue'),
+      meta: { title: '养护知识库' }
+    },
+    {
       path: '/about',
       name: 'about',
       component: About
