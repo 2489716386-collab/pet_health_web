@@ -76,14 +76,14 @@ const router = createRouter({
           path: '/system/pet-breeds',
           name: 'PetBreeds',
           component: PetBreeds
+        },
+        {
+          path: '/system/knowledge',
+          name: 'CareKnowledgeBase',
+          component: () => import('@/view/system/CareKnowledgeBase.vue'),
+          meta: { title: '养护知识库' }
         }
       ]
-    },
-    {
-      path: '/system/knowledge',
-      name: 'CareKnowledgeBase',
-      component: () => import('@/view/system/CareKnowledgeBase.vue'),
-      meta: { title: '养护知识库' }
     },
     {
       path: '/about',
