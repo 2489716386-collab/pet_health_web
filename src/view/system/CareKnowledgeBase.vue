@@ -8,22 +8,40 @@
       <el-button type="success" icon="el-icon-plus" style="float: right;" @click="handleCreate">新增知识</el-button>
     </el-card>
 
-    <el-table :data="list" border stripe style="width: 100%">
-      <el-table-column prop="id" label="ID" width="80" align="center" />
-      <el-table-column prop="species" label="物种" width="100" align="center" />
-      <el-table-column prop="breed" label="品种" width="120" align="center" />
-      <el-table-column prop="lifeStage" label="生长阶段" width="100" align="center" />
-      <el-table-column prop="dietAdvice" label="饮食建议" show-overflow-tooltip />
-      <el-table-column prop="medicalAdvice" label="医疗建议" show-overflow-tooltip />
-      <el-table-column label="操作" width="180" align="center">
+    <el-table
+      :data="list"
+      style="width: 100%"
+      border
+      v-loading="loading"
+    >
+      <el-table-column prop="id" label="ID" width="60" align="center"></el-table-column>
+      <el-table-column prop="species" label="物种" width="80"></el-table-column>
+      <el-table-column prop="breed" label="品种" width="120"></el-table-column>
+      <el-table-column prop="lifeStage" label="生命阶段" width="100"></el-table-column>
+      <el-table-column label="标准体重(kg)" width="120" align="center">
         <template v-slot="scope">
-          <el-button size="mini" type="primary" @click="handleUpdate(scope.row)">修改</el-button>
-          <el-button size="mini" type="danger" @click="handleDelete(scope.row)">删除</el-button>
+          {{ scope.row.weightMin }} - {{ scope.row.weightMax }}
+        </template>
+      </el-table-column>
+      <el-table-column prop="kcalPerKg" label="建议热量(kcal/kg)" width="140" align="center"></el-table-column>
+      <el-table-column prop="exerciseMinsPerDay" label="建议运动(分钟/天)" width="150" align="center"></el-table-column>
+
+      <el-table-column prop="dietAdvice" label="饮食规范" show-overflow-tooltip></el-table-column>
+      <el-table-column prop="hygieneAdvice" label="清洁规范" show-overflow-tooltip></el-table-column>
+      <el-table-column prop="medicalAdvice" label="医疗规范" show-overflow-tooltip></el-table-column>
+      <el-table-column prop="environmentAdvice" label="环境规范" show-overflow-tooltip></el-table-column>
+      <el-table-column prop="caution" label="绝对禁忌" show-overflow-tooltip></el-table-column>
+      <el-table-column prop="specificPrompt" label="专属提示词" show-overflow-tooltip></el-table-column>
+
+      <el-table-column label="操作" width="150" align="center" fixed="right">
+        <template v-slot="scope">
+          <el-button size="mini" type="primary" icon="el-icon-edit" @click="handleEdit(scope.row)"></el-button>
+          <el-button size="mini" type="danger" icon="el-icon-delete" @click="handleDelete(scope.row)"></el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <el-dialog :title="dialogStatus === 'create' ? '新增养护知识' : '编辑养护知识'" v-model:visible="dialogFormVisible" width="600px">
+    <el-dialog :title="dialogStatus === 'create' ? '新增养护知识' : '编辑养护知识'" v-model="dialogFormVisible" width="600px">
       <el-form ref="dataForm" :model="temp" label-width="100px">
         <el-row :gutter="20">
           <el-col :span="12">
@@ -102,7 +120,7 @@ export default {
       // 调用后端重构后的 getKnowledgeList 接口
       this.$axios.get('/knowledge-base/list', { params: this.listQuery }).then(res => {
         if (res.data.code === 200) {
-          this.list = res.data.data
+          this.list = res.data
         }
       })
     },
@@ -143,4 +161,5 @@ export default {
     }
   }
 }
+
 </script>

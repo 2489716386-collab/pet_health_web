@@ -117,7 +117,7 @@ const handleLogin = async () => {
   align-items: center;
   height: 100vh;
 
-  background-image: url('https://free.boltp.com/2026/03/31/69cb54aee89b7.webp');
+  background-image: url('https://mp-aa1e3790-0b44-4bfc-afa7-9b9be364f376.cdn.bspapp.com/cloudstorage/7df3709a-fe19-46da-bd51-6e5371d8e449.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
